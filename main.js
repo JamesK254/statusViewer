@@ -7,7 +7,7 @@ puppeteer.use(StealthPlugin())
 
 const click = async function click(page, xpath) {
     try {
-        const element = await page.waitForXPath(xpath)
+        const element = await page.waitForXPath(xpath, {timeout: 300000})
         if (element) {
             const dim = await element.boundingBox()
             const x = dim.x + (dim.width / 2);
@@ -22,7 +22,7 @@ const click = async function click(page, xpath) {
 
 async function getTextFromXpath(page,xpath){
     // Wait for the element to appear on the page
-    await page.waitForXPath(xpath);
+    await page.waitForXPath(xpath, {timeout: 300000});
 
     // Get the text from the element using evaluate
     const text = await page.evaluate(() => {
@@ -58,9 +58,10 @@ function promptUser() {
 
 
 async function subRun(page){
+        
         await click(page, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[2]/div/span')
         // Wait for the parent div with class "statusList" to appear on the page
-        await page.waitForSelector('.statusList');
+        await page.waitForSelector('.statusList', {timeout: 300000});
 
         // Get the titles and inner text paired together within [role="listitem"] div
         const data = await page.$$eval('.statusList [role="listitem"]', elements => {
@@ -124,7 +125,7 @@ async function run() {
         while(true){
             // You can continue interacting with the page as needed
         let formattedData;
-        let targetUser = 'Gammer';
+        let targetUser = 'Solo';
         let foundUser = false;
 
         while (!foundUser) {
@@ -150,6 +151,7 @@ async function run() {
           // Find the element with the value 'Daisy' and click it
           const userElement = await page.$(`.statusList [role="listitem"] span[title="${targetUser}"]`);
           if (userElement) {
+            await sleep(3);
             await userElement.click();
             console.log(`Clicked on the element with title ${targetUser}.`);
           }
