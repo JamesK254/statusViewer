@@ -65,7 +65,6 @@ function promptUser() {
 }
 
 async function subRun(page) {
-  
   // Wait for the parent div with class "statusList" to appear on the page
   await page.waitForSelector(".statusList", { timeout: 300000 });
 
@@ -79,48 +78,23 @@ async function subRun(page) {
 
         const innerTextElement = element.querySelector(
           '[data-testid="cell-frame-secondary"] div'
+          
         );
         const innerText = innerTextElement
           ? innerTextElement.innerText.trim()
           : null;
-
-        return [title, innerText];
+        
+        
+        return title;
+        // return [title, innerText];
       });
     }
   );
+  // console.log('Eval passed', data);
 
   // Filter out any null or undefined values in the data array
-  const filteredData = data.filter(([title, innerText]) => title && innerText);
-
-  // Convert time strings into formatted datetime strings
-  const formattedData = filteredData.map(([title, timeString]) => {
-    const now = new Date();
-    const timeParts = timeString.match(/(\d+):(\d+)\s+(am|pm)/i);
-
-    if (!timeParts) return [title, "Invalid Time"];
-
-    let hour = parseInt(timeParts[1]);
-    const minute = parseInt(timeParts[2]);
-    const ampm = timeParts[3].toLowerCase();
-    if (ampm === "pm" && hour < 12) hour += 12;
-
-    const date = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      hour,
-      minute
-    );
-    if (timeString.toLowerCase().includes("yesterday")) {
-      date.setDate(now.getDate() - 1);
-    }
-
-    let newformattedDate = date.setHours(date.getHours() + 3); //adding 3 hours for my local time
-
-    return [title, newformattedDate];
-  });
-
-  return formattedData;
+  const filteredData = data.filter((title) => title);
+  return filteredData;
 }
 
 async function run() {
@@ -154,24 +128,23 @@ async function run() {
       console.log('Running')
       // You can continue interacting with the page as needed
       let formattedData;
-      let targetUser = "Daisy";
+      let targetUser = "Francyn";
       
 
       while (!foundUser) {
         // You can continue interacting with the page as needed
         formattedData = await subRun(page);
-
-        for (const [username, timestamp] of formattedData) {
-          if (username === targetUser) {
-            console.log(`${targetUser} found! Timestamp: ${timestamp}`);
+        formattedData.forEach(username => {
+          if(username == targetUser){
+            console.log(`The user:${targetUser} found!`);
             foundUser = true;
-            break; // No need to continue checking if the user is found
           }
-        }
+        });
+
 
         if (!foundUser) {
           // console.log("User not found. Reloading in the next 10 seconds...");
-          console.log("User not found");
+          console.log(`User not found ${targetUser}`);
           await sleep(2);
           // await page.reload();
         }
@@ -200,9 +173,6 @@ async function run() {
             page,
             '//*[@id="app"]/div/span[3]/div/span/div/div/button[2]/span'
           );
-          // console.log(
-          //   `Completed viewing ${targetUser} status succefully, now reloading after 5 seconds`
-          // );
           console.log(
             `Completed viewing ${targetUser} status succefully, now waiting for new post`
           );
